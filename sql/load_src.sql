@@ -4,6 +4,7 @@ SET search_path TO SRC;
 --src_productions
 DROP TABLE IF EXISTS src_production; 
 SELECT DISTINCT ON (site_id, sensor_id, production_date)
+    production_id,
     site_id, 
     sensor_id, 
     production_date, 
