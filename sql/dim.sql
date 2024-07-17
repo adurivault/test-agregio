@@ -32,4 +32,17 @@ SELECT
         ELSE 'Partially Operational'
     END AS site_status
 FROM src.src_sites
-LEFT JOIN site_sensors ON src_sites.site_id = src_sensors.site_id
+LEFT JOIN site_sensors ON src_sites.site_id = src_sensors.site_id;
+
+CREATE SCHEMA IF NOT EXISTS dim;
+SET search_path TO dim; 
+DROP TABLE IF EXISTS dim_sensors; 
+SELECT 
+    sensor_id, 
+    site_id,
+    sensor_type, 
+    installation_date, 
+    status, 
+    current_date - installation_date AS sensor_age
+INTO dim_sensors
+FROM src.src_sensors
