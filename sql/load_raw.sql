@@ -1,3 +1,6 @@
+CREATE SCHEMA RAW;
+SET search_path TO RAW; 
+
 CREATE TABLE raw_production (
 production_id SERIAL PRIMARY KEY,
 site_id INT NOT NULL,
