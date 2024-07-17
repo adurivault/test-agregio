@@ -2,27 +2,17 @@ CREATE SCHEMA IF NOT EXISTS DIM;
 SET search_path TO DIM; 
 
 DROP TABLE IF EXISTS dim_sites; 
-CREATE TABLE dim_sites (
-    site_id,
-    site_name INT NOT NULL,
-    location VARCHAR(100),
-    installation_date DATE,
-    total_capacity DECIMAL(10, 2),
-    site_status VARCHAR(50)
-);
+WITH site_sensors AS (
+	SELECT 
+		site_id, 
+		COUNT(*) AS nb_sensors,
+		SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) AS nb_active_sensors
+	FROM src.src_sensors
+	GROUP BY site_id
+)
 
-WITH (
-    SELECT 
-        site_id, 
-        COUNT(*) AS nb_sensors,
-        SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) AS nb_active_sensors
-    FROM src.src_sensors
-    GROUP BY site_id
-) AS site_sensors
-
-INSERT INTO dim_sites (site_id, site_name, location, installation_date, total_capacity, site_status)
 SELECT 
-    site_id, 
+    src_sites.site_id, 
     site_name, 
     location, 
     installation_date, 
@@ -31,9 +21,9 @@ SELECT
         WHEN nb_active_sensors = 0 THEN 'Non Operational'
         ELSE 'Partially Operational'
     END AS site_status
+INTO dim_sites
 FROM src.src_sites
-LEFT JOIN site_sensors ON src_sites.site_id = src_sensors.site_id;
-
+LEFT JOIN site_sensors ON src_sites.site_id = site_sensors.site_id;
 CREATE SCHEMA IF NOT EXISTS dim;
 SET search_path TO dim; 
 DROP TABLE IF EXISTS dim_sensors; 
